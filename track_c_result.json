@@ -1,0 +1,94 @@
+{
+    "project": "Track C - Contrastive Speech Analytics",
+    "flaw": {
+        "type": "excessive_speech_rate",
+        "severity": "HIGH",
+        "causal_score": 85,
+        "confidence": 1.0
+    },
+    "temporal_grounding": {
+        "detected": {
+            "start": 2.02,
+            "end": 7.4
+        },
+        "ground_truth": {
+            "start": 2.64,
+            "end": 7.4
+        },
+        "iou": 0.8847583643122675
+    },
+    "comparison": {
+        "ground_truth_text": "today i am going to explain how artificial intelligence can help us solve real world problems.",
+        "flawed_region": {
+            "start": 2.64,
+            "end": 7.4,
+            "word_count": 18
+        },
+        "ideal_region": {
+            "start": 2.38,
+            "end": 9.48,
+            "word_count": 16
+        }
+    },
+    "ideal_region": {
+        "start": 2.38,
+        "end": 9.48,
+        "word_count": 16,
+        "features": {
+            "speech_rate": 135.2112676056338,
+            "energy": 0.02323697879910469,
+            "average_pitch": 135.10198686760566,
+            "pitch_variation": 19.149156941656383,
+            "mfcc": [
+                -321.17803955078125,
+                148.1938934326172,
+                -10.869363784790039,
+                29.45700454711914,
+                6.579615592956543,
+                6.266992092132568,
+                -3.1541907787323,
+                -0.5802769064903259,
+                -10.669647216796875,
+                -5.5101165771484375,
+                -8.566496849060059,
+                -5.221038341522217,
+                -10.52379035949707
+            ]
+        }
+    },
+    "flawed_region": {
+        "start": 2.64,
+        "end": 7.4,
+        "word_count": 18,
+        "features": {
+            "speech_rate": 226.89075630252103,
+            "energy": 0.01980331540107727,
+            "average_pitch": 144.44960379190368,
+            "pitch_variation": 9.79895698563703,
+            "mfcc": [
+                -391.31536865234375,
+                133.01805114746094,
+                2.1428284645080566,
+                26.81965446472168,
+                4.580740928649902,
+                2.1713099479675293,
+                -11.372594833374023,
+                -16.013710021972656,
+                -13.034099578857422,
+                -11.736913681030273,
+                -13.853666305541992,
+                -13.310060501098633,
+                -10.343294143676758
+            ]
+        }
+    },
+    "feature_changes": {
+        "speech_rate_percent": 67.80462184873952,
+        "energy_percent": -14.776720449388703,
+        "pitch_percent": 6.918933718908442,
+        "pitch_variation_percent": -48.82825904298307,
+        "mfcc_distance": 76.09277019946546
+    },
+    "causal_explanation": "The flawed speech between 2.64s and 7.40s was delivered 67.80% faster than the corresponding ideal region. Vocal energy changed by -14.78%, while pitch variation changed by -48.83%. These region-specific acoustic measurements support the identification of excessive speech rate.",
+    "recommendation": "Slow down during the highlighted region. Introduce short pauses between major phrases and clearly pronounce important words."
+}

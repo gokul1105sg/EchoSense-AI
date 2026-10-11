@@ -1,0 +1,16 @@
+{
+    "flaw_type": "EXCESSIVE SPEECH RATE",
+    "severity": "HIGH",
+    "causal_score": 100,
+    "confidence": 1.0,
+    "evidence": {
+        "speech_rate_change": 74.66,
+        "duration_change": -40.64,
+        "pitch_change": 5.04,
+        "energy_change": -35.86,
+        "pitch_variation_change": -23.29,
+        "mfcc_distance": 125.06
+    },
+    "causal_explanation": "The speaker delivered the affected speech region 74.66% faster than the ideal reference. The delivery duration decreased by 40.64%, indicating compressed speech. Vocal energy also decreased by 35.86%, suggesting reduced vocal strength during the fast delivery. Pitch variation decreased by 23.29%, indicating reduced expressiveness. Together, these measurements provide acoustic evidence for excessive speaking speed.",
+    "recommendation": "Slow down during the highlighted region. Introduce short pauses between major phrases and clearly pronounce important words."
+}

@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.pyc
+_dashboard_ideal.wav
+_dashboard_flawed.wav
+
+frontend/
+livekit_flutter_starter/
+
+src/agent_starter_python.egg-info/

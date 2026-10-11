@@ -1,0 +1,29 @@
+{
+    "pair_id": "speech1_flawed1",
+
+    "ideal_audio": "dataset/ideal/speech1.wav",
+    "flawed_audio": "dataset/flawed/flawed1.wav",
+
+    "transcript": "Good morning everyone. Today I am going to explain how artificial intelligence can help us solve real world problems. Artificial intelligence is becoming an important part of modern technology.",
+
+    "flaws": [
+        {
+            "type": "excessive_speech_rate",
+            "description": "The middle sentence was intentionally spoken faster than the ideal delivery.",
+
+            "text": "Today I am going to explain how artificial intelligence can help us solve real world problems.",
+
+            "flawed_start": 2.64,
+            "flawed_end": 7.40,
+
+            "severity": "HIGH",
+
+            "expected_effects": [
+                "increased speech rate",
+                "reduced delivery duration",
+                "possible change in pitch variation",
+                "possible change in vocal energy"
+            ]
+        }
+    ]
+}
