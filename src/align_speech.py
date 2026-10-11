@@ -15,12 +15,14 @@ def get_words(file):
 
     for segment in result["segments"]:
         for word in segment["words"]:
-            words.append({
-                "word": word["word"].strip().lower(),
-                "start": word["start"],
-                "end": word["end"],
-                "duration": word["end"] - word["start"]
-            })
+            words.append(
+                {
+                    "word": word["word"].strip().lower(),
+                    "start": word["start"],
+                    "end": word["end"],
+                    "duration": word["end"] - word["start"],
+                }
+            )
 
     return words
 
@@ -40,17 +42,12 @@ print("==============================\n")
 matches = matcher.get_matching_blocks()
 
 for block in matches:
-
     if block.size == 0:
         continue
 
-    print(
-        f"\nMatching region: "
-        f"{block.a} - {block.a + block.size}"
-    )
+    print(f"\nMatching region: {block.a} - {block.a + block.size}")
 
     for i in range(block.size):
-
         iw = ideal[block.a + i]
         fw = flawed[block.b + i]
 

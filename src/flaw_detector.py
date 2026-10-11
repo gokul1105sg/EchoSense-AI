@@ -15,12 +15,14 @@ def get_words(file):
 
     for segment in result["segments"]:
         for word in segment["words"]:
-            words.append({
-                "word": word["word"].strip().lower(),
-                "start": word["start"],
-                "end": word["end"],
-                "duration": word["end"] - word["start"]
-            })
+            words.append(
+                {
+                    "word": word["word"].strip().lower(),
+                    "start": word["start"],
+                    "end": word["end"],
+                    "duration": word["end"] - word["start"],
+                }
+            )
 
     return words
 
@@ -36,33 +38,30 @@ matcher = SequenceMatcher(None, ideal_words, flawed_words)
 results = []
 
 for block in matcher.get_matching_blocks():
-
     if block.size == 0:
         continue
 
     for i in range(block.size):
-
         iw = ideal[block.a + i]
         fw = flawed[block.b + i]
 
         if iw["duration"] == 0:
             continue
 
-        reduction = (
-            (iw["duration"] - fw["duration"])
-            / iw["duration"]
-        ) * 100
+        reduction = ((iw["duration"] - fw["duration"]) / iw["duration"]) * 100
 
-        results.append({
-            "word": iw["word"],
-            "ideal_start": iw["start"],
-            "ideal_end": iw["end"],
-            "flawed_start": fw["start"],
-            "flawed_end": fw["end"],
-            "ideal_duration": iw["duration"],
-            "flawed_duration": fw["duration"],
-            "reduction": reduction
-        })
+        results.append(
+            {
+                "word": iw["word"],
+                "ideal_start": iw["start"],
+                "ideal_end": iw["end"],
+                "flawed_start": fw["start"],
+                "flawed_end": fw["end"],
+                "ideal_duration": iw["duration"],
+                "flawed_duration": fw["duration"],
+                "reduction": reduction,
+            }
+        )
 
 
 print("\n==============================")
@@ -70,9 +69,7 @@ print("TEMPORAL FLAW ANALYSIS")
 print("==============================\n")
 
 for row in results:
-
     if row["reduction"] >= 40:
-
         print(
             f"⚠ {row['word']:15} | "
             f"Ideal: {row['ideal_duration']:.2f}s | "

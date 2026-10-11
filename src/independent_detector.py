@@ -12,28 +12,25 @@ MODEL = whisper.load_model("base")
 # TRANSCRIBE AUDIO WITH WORD TIMESTAMPS
 # ==========================================
 
+
 def transcribe(file):
 
-    result = MODEL.transcribe(
-        file,
-        word_timestamps=True
-    )
+    result = MODEL.transcribe(file, word_timestamps=True)
 
     words = []
 
     for segment in result["segments"]:
-
         for word in segment["words"]:
-
             text = word["word"].strip()
 
             if text:
-
-                words.append({
-                    "word": text.lower(),
-                    "start": float(word["start"]),
-                    "end": float(word["end"])
-                })
+                words.append(
+                    {
+                        "word": text.lower(),
+                        "start": float(word["start"]),
+                        "end": float(word["end"]),
+                    }
+                )
 
     return words
 
@@ -42,13 +39,13 @@ def transcribe(file):
 # DETECT ABNORMALLY FAST SPEECH
 # ==========================================
 
+
 def detect_fast_regions(words):
 
     abnormal = []
 
     # Check every word
     for i, word in enumerate(words):
-
         duration = word["end"] - word["start"]
 
         if duration <= 0:
@@ -61,7 +58,6 @@ def detect_fast_regions(words):
         nearby = []
 
         for j in range(start, end):
-
             if j == i:
                 continue
 
@@ -80,7 +76,6 @@ def detect_fast_regions(words):
         # If the word is much shorter than nearby words,
         # mark it as abnormal
         if duration < median_duration * 0.70:
-
             abnormal.append(word)
 
     # No abnormal words
@@ -96,17 +91,14 @@ def detect_fast_regions(words):
     current = [abnormal[0]]
 
     for word in abnormal[1:]:
-
         gap = word["start"] - current[-1]["end"]
 
         # If abnormal words are close together,
         # consider them part of the same region
         if gap <= 3.0:
-
             current.append(word)
 
         else:
-
             if len(current) >= 2:
                 regions.append(current)
 
@@ -123,44 +115,30 @@ def detect_fast_regions(words):
     final_regions = []
 
     for region in regions:
-
         start = region[0]["start"]
         end = region[-1]["end"]
 
         # Find word before the region
-        previous_words = [
-            w for w in words
-            if w["end"] <= start
-        ]
+        previous_words = [w for w in words if w["end"] <= start]
 
         # Find word after the region
-        next_words = [
-            w for w in words
-            if w["start"] >= end
-        ]
+        next_words = [w for w in words if w["start"] >= end]
 
         # Include previous word if it is close
         if previous_words:
-
             previous = previous_words[-1]
 
             if start - previous["end"] <= 1.0:
-
                 start = previous["start"]
 
         # Include next word if it is close
         if next_words:
-
             following = next_words[0]
 
             if following["start"] - end <= 1.0:
-
                 end = following["end"]
 
-        final_regions.append({
-            "start": start,
-            "end": end
-        })
+        final_regions.append({"start": start, "end": end})
 
     return final_regions
 
@@ -168,6 +146,7 @@ def detect_fast_regions(words):
 # ==========================================
 # MAIN PROGRAM
 # ==========================================
+
 
 def main():
 
@@ -191,7 +170,6 @@ def main():
     # ==========================================
 
     if not regions:
-
         print("\nNo fast-speech regions detected.")
 
         return
@@ -205,7 +183,6 @@ def main():
     print("======================================")
 
     for i, region in enumerate(regions, 1):
-
         start = region["start"]
         end = region["end"]
 
@@ -213,17 +190,11 @@ def main():
 
         # Get words inside the region
         region_words = [
-            word
-            for word in words
-            if word["end"] >= start
-            and word["start"] <= end
+            word for word in words if word["end"] >= start and word["start"] <= end
         ]
 
         # Create text
-        text = " ".join(
-            word["word"]
-            for word in region_words
-        )
+        text = " ".join(word["word"] for word in region_words)
 
         # Calculate local speech rate
         rate = len(region_words) / duration * 60 if duration > 0 else 0

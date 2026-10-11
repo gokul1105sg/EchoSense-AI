@@ -15,9 +15,7 @@ def analyze_speech(path):
 
     # Pitch / F0
     f0, _voiced_flag, _voiced_probs = librosa.pyin(
-        y,
-        fmin=librosa.note_to_hz("C2"),
-        fmax=librosa.note_to_hz("C7")
+        y, fmin=librosa.note_to_hz("C2"), fmax=librosa.note_to_hz("C7")
     )
 
     pitch = f0[~np.isnan(f0)]
@@ -25,11 +23,7 @@ def analyze_speech(path):
     avg_pitch = float(np.mean(pitch)) if len(pitch) > 0 else 0.0
 
     # MFCC
-    mfcc = librosa.feature.mfcc(
-        y=y,
-        sr=sr,
-        n_mfcc=13
-    )
+    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
 
     mfcc_mean = np.mean(mfcc, axis=1)
 
@@ -38,10 +32,7 @@ def analyze_speech(path):
     fft_mean = float(np.mean(fft))
 
     # Detect silence / pauses
-    intervals = librosa.effects.split(
-        y,
-        top_db=30
-    )
+    intervals = librosa.effects.split(y, top_db=30)
 
     speech_time = 0
 
@@ -63,7 +54,7 @@ def analyze_speech(path):
         "average_pitch_hz": round(avg_pitch, 2),
         "average_energy": round(avg_energy, 4),
         "fft_mean": round(fft_mean, 4),
-        "mfcc": [round(float(x), 4) for x in mfcc_mean]
+        "mfcc": [round(float(x), 4) for x in mfcc_mean],
     }
 
     return result

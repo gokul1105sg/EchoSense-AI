@@ -10,13 +10,14 @@ FEATURES = {
     "pitch_change": 5.04,
     "energy_change": -35.86,
     "pitch_variation_change": -23.29,
-    "mfcc_distance": 125.06
+    "mfcc_distance": 125.06,
 }
 
 
 # --------------------------------------------------
 # CALCULATE CAUSAL SCORE
 # --------------------------------------------------
+
 
 def calculate_score(features):
 
@@ -67,6 +68,7 @@ def calculate_score(features):
 # DETERMINE SEVERITY
 # --------------------------------------------------
 
+
 def get_severity(score):
 
     if score >= 70:
@@ -82,6 +84,7 @@ def get_severity(score):
 # --------------------------------------------------
 # DETERMINE CONFIDENCE
 # --------------------------------------------------
+
 
 def get_confidence(features):
 
@@ -126,6 +129,7 @@ def get_confidence(features):
 # IDENTIFY FLAW
 # --------------------------------------------------
 
+
 def identify_flaw(features):
 
     rate = features["speech_rate_change"]
@@ -152,6 +156,7 @@ def identify_flaw(features):
 # CAUSAL EXPLANATION
 # --------------------------------------------------
 
+
 def create_explanation(features, flaw):
 
     rate = features["speech_rate_change"]
@@ -163,7 +168,6 @@ def create_explanation(features, flaw):
     variation = features["pitch_variation_change"]
 
     if flaw == "EXCESSIVE SPEECH RATE":
-
         explanation = (
             f"The speaker delivered the affected speech region "
             f"{rate:.2f}% faster than the ideal reference. "
@@ -172,7 +176,6 @@ def create_explanation(features, flaw):
         )
 
         if energy <= -20:
-
             explanation += (
                 f"Vocal energy also decreased by "
                 f"{abs(energy):.2f}%, suggesting reduced vocal "
@@ -180,7 +183,6 @@ def create_explanation(features, flaw):
             )
 
         if variation <= -10:
-
             explanation += (
                 f"Pitch variation decreased by "
                 f"{abs(variation):.2f}%, indicating reduced "
@@ -195,7 +197,6 @@ def create_explanation(features, flaw):
         return explanation
 
     elif flaw == "SLOW SPEECH RATE":
-
         return (
             f"The speaker's speech rate decreased by "
             f"{abs(rate):.2f}% compared with the ideal reference. "
@@ -204,7 +205,6 @@ def create_explanation(features, flaw):
         )
 
     elif flaw == "LOW VOCAL ENERGY":
-
         return (
             f"Vocal energy decreased by "
             f"{abs(energy):.2f}% compared with the ideal reference. "
@@ -212,7 +212,6 @@ def create_explanation(features, flaw):
         )
 
     elif flaw == "LOW PITCH VARIATION":
-
         return (
             f"Pitch variation decreased by "
             f"{abs(variation):.2f}%. "
@@ -229,6 +228,7 @@ def create_explanation(features, flaw):
 # RECOMMENDATION
 # --------------------------------------------------
 
+
 def create_recommendation(flaw):
     recommendations = {
         "EXCESSIVE SPEECH RATE": (
@@ -241,8 +241,7 @@ def create_recommendation(flaw):
             "speaking pace. Avoid unnecessary pauses."
         ),
         "LOW VOCAL ENERGY": (
-            "Increase vocal strength and maintain a clearer "
-            "and more audible delivery."
+            "Increase vocal strength and maintain a clearer and more audible delivery."
         ),
         "LOW PITCH VARIATION": (
             "Use more natural pitch variation to make the "
@@ -253,13 +252,14 @@ def create_recommendation(flaw):
     return recommendations.get(
         flaw,
         "Practice speaking clearly with a natural pace, "
-        "consistent vocal energy, and appropriate pitch variation."
+        "consistent vocal energy, and appropriate pitch variation.",
     )
 
 
 # --------------------------------------------------
 # BUILD FINAL RESULT
 # --------------------------------------------------
+
 
 def analyze(features):
 
@@ -271,67 +271,25 @@ def analyze(features):
 
     confidence = get_confidence(features)
 
-    explanation = create_explanation(
-        features,
-        flaw
-    )
+    explanation = create_explanation(features, flaw)
 
-    recommendation = create_recommendation(
-        flaw
-    )
+    recommendation = create_recommendation(flaw)
 
     result = {
-
         "flaw_type": flaw,
-
         "severity": severity,
-
-        "causal_score": round(
-            score,
-            2
-        ),
-
-        "confidence": round(
-            confidence,
-            2
-        ),
-
+        "causal_score": round(score, 2),
+        "confidence": round(confidence, 2),
         "evidence": {
-
-            "speech_rate_change": round(
-                features["speech_rate_change"],
-                2
-            ),
-
-            "duration_change": round(
-                features["duration_change"],
-                2
-            ),
-
-            "pitch_change": round(
-                features["pitch_change"],
-                2
-            ),
-
-            "energy_change": round(
-                features["energy_change"],
-                2
-            ),
-
-            "pitch_variation_change": round(
-                features["pitch_variation_change"],
-                2
-            ),
-
-            "mfcc_distance": round(
-                features["mfcc_distance"],
-                2
-            )
+            "speech_rate_change": round(features["speech_rate_change"], 2),
+            "duration_change": round(features["duration_change"], 2),
+            "pitch_change": round(features["pitch_change"], 2),
+            "energy_change": round(features["energy_change"], 2),
+            "pitch_variation_change": round(features["pitch_variation_change"], 2),
+            "mfcc_distance": round(features["mfcc_distance"], 2),
         },
-
         "causal_explanation": explanation,
-
-        "recommendation": recommendation
+        "recommendation": recommendation,
     }
 
     return result
@@ -341,6 +299,7 @@ def analyze(features):
 # MAIN
 # --------------------------------------------------
 
+
 def main():
 
     print()
@@ -348,32 +307,17 @@ def main():
     print("CAUSAL FLAW SCORING")
     print("======================================")
 
-    result = analyze(
-        FEATURES
-    )
+    result = analyze(FEATURES)
 
     print()
 
-    print(
-        "Flaw Type:",
-        result["flaw_type"]
-    )
+    print("Flaw Type:", result["flaw_type"])
 
-    print(
-        "Severity:",
-        result["severity"]
-    )
+    print("Severity:", result["severity"])
 
-    print(
-        "Causal Score:",
-        result["causal_score"],
-        "/ 100"
-    )
+    print("Causal Score:", result["causal_score"], "/ 100")
 
-    print(
-        "Confidence:",
-        result["confidence"]
-    )
+    print("Confidence:", result["confidence"])
 
     print()
     print("--------------------------------------")
@@ -381,49 +325,31 @@ def main():
     print("--------------------------------------")
 
     for key, value in result["evidence"].items():
-
-        print(
-            f"{key}: {value}"
-        )
+        print(f"{key}: {value}")
 
     print()
     print("--------------------------------------")
     print("CAUSAL EXPLANATION")
     print("--------------------------------------")
 
-    print(
-        result["causal_explanation"]
-    )
+    print(result["causal_explanation"])
 
     print()
     print("--------------------------------------")
     print("RECOMMENDATION")
     print("--------------------------------------")
 
-    print(
-        result["recommendation"]
-    )
+    print(result["recommendation"])
 
     print()
     print("======================================")
 
     # Save JSON
-    with open(
-        "causal_result.json",
-        "w",
-        encoding="utf-8"
-    ) as file:
-
-        json.dump(
-            result,
-            file,
-            indent=4
-        )
+    with open("causal_result.json", "w", encoding="utf-8") as file:
+        json.dump(result, file, indent=4)
 
     print()
-    print(
-        "Result saved to causal_result.json"
-    )
+    print("Result saved to causal_result.json")
 
 
 # --------------------------------------------------

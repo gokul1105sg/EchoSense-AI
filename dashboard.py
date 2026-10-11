@@ -30,7 +30,6 @@ def render_html(html):
     st.markdown("\n".join(line for line in lines if line), unsafe_allow_html=True)
 
 
-
 # ============================================================
 # PROFESSIONAL CSS
 # ============================================================
@@ -319,47 +318,24 @@ FLAWED_DEFAULT = DATASET_DIR / "flawed" / "flawed1.wav"
 # HELPERS
 # ============================================================
 
-def load_audio(path):
-    return librosa.load(
-        str(path),
-        sr=16000,
-        mono=True
-    )
 
+def load_audio(path):
+    return librosa.load(str(path), sr=16000, mono=True)
 
 
 def feature_analysis(y, sr):
 
     hop = 512
 
-    rms = librosa.feature.rms(
-        y=y,
-        frame_length=1024,
-        hop_length=hop
-    )[0]
+    rms = librosa.feature.rms(y=y, frame_length=1024, hop_length=hop)[0]
 
     f0, _, _ = librosa.pyin(
-        y,
-        fmin=70,
-        fmax=400,
-        sr=sr,
-        frame_length=2048,
-        hop_length=hop
+        y, fmin=70, fmax=400, sr=sr, frame_length=2048, hop_length=hop
     )
 
-    mfcc = librosa.feature.mfcc(
-        y=y,
-        sr=sr,
-        n_mfcc=13,
-        hop_length=hop
-    )
+    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13, hop_length=hop)
 
-    times = librosa.times_like(
-        rms,
-        sr=sr,
-        hop_length=hop
-    )
-
+    times = librosa.times_like(rms, sr=sr, hop_length=hop)
 
     pitch_clean = f0[~np.isnan(f0)]
 
@@ -386,14 +362,7 @@ def pct(a, b):
     return ((b - a) / a * 100.0) if a else 0.0
 
 
-def highlight_region(
-    fig,
-    start,
-    end,
-    color,
-    label
-
-):
+def highlight_region(fig, start, end, color, label):
 
     if start is None or end is None or end <= start:
         return
@@ -406,25 +375,15 @@ def highlight_region(
         line_width=0,
         annotation_text=label,
         annotation_position="top left",
-        annotation_font={
-            "color": color
-        }
+        annotation_font={"color": color},
     )
 
 
 def comparison_chart(
-    ideal_time,
-    ideal_value,
-    flawed_time,
-    flawed_value,
-    title,
-    y_title,
-    start,
-    end
+    ideal_time, ideal_value, flawed_time, flawed_value, title, y_title, start, end
 ):
 
     fig = go.Figure()
-
 
     fig.add_trace(
         go.Scatter(
@@ -432,10 +391,7 @@ def comparison_chart(
             y=ideal_value,
             mode="lines",
             name="Ideal",
-            line={
-                "color": "#60a5fa",
-                "width": 2
-            }
+            line={"color": "#60a5fa", "width": 2},
         )
     )
 
@@ -445,53 +401,28 @@ def comparison_chart(
             y=flawed_value,
             mode="lines",
             name="Participant",
-            line={
-                "color": "#fb7185",
-                "width": 2
-            }
+            line={"color": "#fb7185", "width": 2},
         )
     )
 
-    highlight_region(
-        fig,
-        start,
-        end,
-        "#ef4444",
-        "Detected flaw"
-
-    )
+    highlight_region(fig, start, end, "#ef4444", "Detected flaw")
 
     fig.update_layout(
-        title={
-            "text": title,
-            "font": {
-                "size": 18,
-                "color": "#e5edf7"
-            }
-        },
+        title={"text": title, "font": {"size": 18, "color": "#e5edf7"}},
         xaxis_title="Time (seconds)",
         yaxis_title=y_title,
         height=430,
         template="plotly_dark",
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="#091625",
-        margin={
-            "l": 45,
-            "r": 20,
-            "t": 55,
-            "b": 45
-        },
-        legend={
-            "orientation": "h",
-            "y": 1.08
-        }
+        margin={"l": 45, "r": 20, "t": 55, "b": 45},
+        legend={"orientation": "h", "y": 1.08},
     )
 
     return fig
 
 
 def build_feedback(rate, energy, pitch_var, mfcc_dist):
-
     """Create a flaw label, explanation, and recommendation from the
     measured regional changes. The text depends on which features
     actually deviate, so different recordings get different feedback.
@@ -500,21 +431,27 @@ def build_feedback(rate, energy, pitch_var, mfcc_dist):
 
     if rate >= 20:
         issues.append(f"speech rate was {rate:.1f}% faster than the ideal")
-        recs.append("Slow down in this region and insert short pauses between major phrases.")
+        recs.append(
+            "Slow down in this region and insert short pauses between major phrases."
+        )
     elif rate <= -20:
         issues.append(f"speech rate was {abs(rate):.1f}% slower than the ideal")
         recs.append("Keep a steadier pace and avoid long hesitations inside phrases.")
 
     if energy <= -15:
         issues.append(f"vocal energy dropped {abs(energy):.1f}%")
-        recs.append("Project your voice more consistently, especially at the end of phrases.")
+        recs.append(
+            "Project your voice more consistently, especially at the end of phrases."
+        )
     elif energy >= 15:
         issues.append(f"vocal energy rose {energy:.1f}%")
         recs.append("Keep loudness even and avoid sudden volume spikes.")
 
     if pitch_var <= -20:
         issues.append(f"pitch variation fell {abs(pitch_var):.1f}% (flatter delivery)")
-        recs.append("Add pitch movement on key words instead of speaking in a flat tone.")
+        recs.append(
+            "Add pitch movement on key words instead of speaking in a flat tone."
+        )
     elif pitch_var >= 20:
         issues.append(f"pitch variation rose {pitch_var:.1f}%")
         recs.append("Keep intonation controlled and avoid exaggerated pitch swings.")
@@ -524,7 +461,6 @@ def build_feedback(rate, energy, pitch_var, mfcc_dist):
     elif rate <= -20:
         flaw = "Insufficient Speech Rate"
     elif pitch_var <= -20:
-
         flaw = "Flat Prosody"
     elif energy <= -15:
         flaw = "Low Vocal Energy"
@@ -549,6 +485,7 @@ def build_feedback(rate, energy, pitch_var, mfcc_dist):
 # ============================================================
 # DYNAMIC TRACK C ANALYSIS
 # ============================================================
+
 
 @st.cache_resource
 def get_whisper_model():
@@ -613,11 +550,13 @@ def transcribe_words(path):
             if end <= start:
                 continue
 
-            words.append({
-                "word": word_text,
-                "start": start,
-                "end": end,
-            })
+            words.append(
+                {
+                    "word": word_text,
+                    "start": start,
+                    "end": end,
+                }
+            )
 
     return words
 
@@ -653,12 +592,14 @@ def detect_fast_regions(words):
             continue
 
         rate = window / span * 60.0
-        window_scores.append({
-            "index": i,
-            "start": float(start),
-            "end": float(end),
-            "rate": float(rate),
-        })
+        window_scores.append(
+            {
+                "index": i,
+                "start": float(start),
+                "end": float(end),
+                "rate": float(rate),
+            }
+        )
 
     if len(window_scores) < 3:
         return []
@@ -725,10 +666,12 @@ def detect_fast_regions(words):
                 end = float(following["end"])
 
         if end - start >= 0.8:
-            regions.append({
-                "start": round(start, 3),
-                "end": round(end, 3),
-            })
+            regions.append(
+                {
+                    "start": round(start, 3),
+                    "end": round(end, 3),
+                }
+            )
 
     # Merge only overlapping or nearly touching detections.
     merged = []
@@ -742,6 +685,7 @@ def detect_fast_regions(words):
             )
 
     return merged
+
 
 def matching_ideal_region(ideal_words, flawed_region_words):
     if not ideal_words or not flawed_region_words:
@@ -778,14 +722,17 @@ def regional_features(path, start, end, word_count):
         valid = np.array([])
     avg_pitch = float(np.mean(valid)) if len(valid) else 0.0
     pitch_var = float(np.std(valid)) if len(valid) else 0.0
-    mfcc = librosa.feature.mfcc(y=segment, sr=sr, n_mfcc=13) if len(segment) else np.zeros((13, 1))
+    mfcc = (
+        librosa.feature.mfcc(y=segment, sr=sr, n_mfcc=13)
+        if len(segment)
+        else np.zeros((13, 1))
+    )
     return {
         "speech_rate": rate,
         "energy": energy,
         "average_pitch": avg_pitch,
         "pitch_variation": pitch_var,
         "mfcc": np.mean(mfcc, axis=1).tolist(),
-
     }
 
 
@@ -807,24 +754,30 @@ def dynamic_track_c_analysis(ideal_path, flawed_path):
         detected_end = min(duration, detected_start + window)
 
     flawed_region_words = [
-        w for w in flawed_words
+        w
+        for w in flawed_words
         if w["end"] >= detected_start and w["start"] <= detected_end
     ]
     ideal_start, ideal_end = matching_ideal_region(ideal_words, flawed_region_words)
     ideal_region_words = [
-        w for w in ideal_words
-        if w["end"] >= ideal_start and w["start"] <= ideal_end
+        w for w in ideal_words if w["end"] >= ideal_start and w["start"] <= ideal_end
     ]
 
-    ideal_f = regional_features(ideal_path, ideal_start, ideal_end, len(ideal_region_words))
-    flawed_f = regional_features(flawed_path, detected_start, detected_end, len(flawed_region_words))
+    ideal_f = regional_features(
+        ideal_path, ideal_start, ideal_end, len(ideal_region_words)
+    )
+    flawed_f = regional_features(
+        flawed_path, detected_start, detected_end, len(flawed_region_words)
+    )
 
     rate_change = pct(ideal_f["speech_rate"], flawed_f["speech_rate"])
     energy_change = pct(ideal_f["energy"], flawed_f["energy"])
 
     pitch_change = pct(ideal_f["average_pitch"], flawed_f["average_pitch"])
     pitch_var_change = pct(ideal_f["pitch_variation"], flawed_f["pitch_variation"])
-    mfcc_dist = float(np.linalg.norm(np.array(ideal_f["mfcc"]) - np.array(flawed_f["mfcc"])))
+    mfcc_dist = float(
+        np.linalg.norm(np.array(ideal_f["mfcc"]) - np.array(flawed_f["mfcc"]))
+    )
 
     score = 0
     if rate_change >= 50:
@@ -939,7 +892,6 @@ render_html(
 
 
 with st.sidebar:
-
     render_html(
         """
         <div style="
@@ -962,13 +914,8 @@ with st.sidebar:
     )
 
     mode = st.radio(
-        "Analysis Mode",
-        [
-            "Prediction / Analysis",
-            "Evaluation / Ground Truth"
-        ]
+        "Analysis Mode", ["Prediction / Analysis", "Evaluation / Ground Truth"]
     )
-
 
     if mode == "Evaluation / Ground Truth":
         st.markdown("### Ground-truth interval")
@@ -984,12 +931,8 @@ with st.sidebar:
     st.markdown("### Dataset")
 
     st.code(
-        "dataset/\n"
-        "├── ideal/\n"
-        "│   └── speech1.wav\n"
-        "└── flawed/\n"
-        "    └── flawed1.wav",
-        language="text"
+        "dataset/\n├── ideal/\n│   └── speech1.wav\n└── flawed/\n    └── flawed1.wav",
+        language="text",
     )
 
     st.caption(
@@ -1015,27 +958,24 @@ render_html(
 c1, c2 = st.columns(2)
 
 with c1:
-
     st.markdown("### 🎯 Ideal / Baseline")
 
     ideal_upload = st.file_uploader(
         "Upload ideal WAV",
         type=["wav"],
         key="ideal_upload",
-        label_visibility="collapsed"
+        label_visibility="collapsed",
     )
 
 with c2:
-
     st.markdown("### 🧑 Participant / Flawed")
 
     flawed_upload = st.file_uploader(
         "Upload participant WAV",
         type=["wav"],
         key="flawed_upload",
-        label_visibility="collapsed"
+        label_visibility="collapsed",
     )
-
 
 
 # ============================================================
@@ -1043,35 +983,27 @@ with c2:
 # ============================================================
 
 if ideal_upload:
-
     ideal_path = BASE_DIR / "_dashboard_ideal.wav"
 
     with open(ideal_path, "wb") as f:
         f.write(ideal_upload.getvalue())
 
 else:
-
     ideal_path = IDEAL_DEFAULT
 
 
 if flawed_upload:
-
     flawed_path = BASE_DIR / "_dashboard_flawed.wav"
 
     with open(flawed_path, "wb") as f:
         f.write(flawed_upload.getvalue())
 
 else:
-
     flawed_path = FLAWED_DEFAULT
 
 
 if not ideal_path.exists() or not flawed_path.exists():
-
-
-    st.warning(
-        "Please provide both ideal and participant WAV files."
-    )
+    st.warning("Please provide both ideal and participant WAV files.")
 
     st.stop()
 
@@ -1092,25 +1024,17 @@ render_html(
 c1, c2 = st.columns(2)
 
 with c1:
-
     st.markdown("**Ideal Speech**")
 
     with open(ideal_path, "rb") as f:
-        st.audio(
-            f.read(),
-            format="audio/wav"
-        )
+        st.audio(f.read(), format="audio/wav")
 
 
 with c2:
-
     st.markdown("**Participant Speech**")
 
     with open(flawed_path, "rb") as f:
-        st.audio(
-            f.read(),
-            format="audio/wav"
-        )
+        st.audio(f.read(), format="audio/wav")
 
 
 # ============================================================
@@ -1118,7 +1042,6 @@ with c2:
 # ============================================================
 
 with st.spinner("Analyzing acoustic features..."):
-
     ideal_y, ideal_sr = load_audio(ideal_path)
     flawed_y, flawed_sr = load_audio(flawed_path)
 
@@ -1133,8 +1056,11 @@ with st.spinner("Analyzing acoustic features..."):
 stamp = (
     (hashlib.md5(ideal_upload.getvalue()).hexdigest() if ideal_upload else "default")
     + "-"
-    + (hashlib.md5(flawed_upload.getvalue()).hexdigest() if flawed_upload else "default")
-
+    + (
+        hashlib.md5(flawed_upload.getvalue()).hexdigest()
+        if flawed_upload
+        else "default"
+    )
 )
 
 with st.spinner("Running Whisper + temporal grounding + acoustic analysis..."):
@@ -1200,7 +1126,6 @@ with k2:
             <div class="kpi-value kpi-red">{severity}</div>
         </div>
         """
-
     )
 
 with k3:
@@ -1251,9 +1176,7 @@ metrics = [
 ]
 
 for col, (label, value, color_class) in zip([m1, m2, m3, m4, m5], metrics):
-
     with col:
-
         render_html(
             f"""
             <div class="kpi">
@@ -1286,7 +1209,7 @@ fig.add_trace(
         y=np.zeros_like(ideal["times"]),
         mode="lines",
         name="Ideal",
-        line={"color": "#60a5fa", "width": 2}
+        line={"color": "#60a5fa", "width": 2},
     )
 )
 
@@ -1296,28 +1219,15 @@ fig.add_trace(
         y=np.ones_like(flawed["times"]),
         mode="lines",
         name="Participant",
-        line={"color": "#fb7185", "width": 2}
+        line={"color": "#fb7185", "width": 2},
     )
 )
 
 
-highlight_region(
-    fig,
-    detected_start,
-    detected_end,
-    "#ef4444",
-    "Detected flaw"
-)
+highlight_region(fig, detected_start, detected_end, "#ef4444", "Detected flaw")
 
 if mode == "Evaluation / Ground Truth":
-
-    highlight_region(
-        fig,
-        ground_start,
-        ground_end,
-        "#22c55e",
-        "Ground truth"
-    )
+    highlight_region(fig, ground_start, ground_end, "#22c55e", "Ground truth")
 
 fig.update_layout(
     title="Where did the system find the problem?",
@@ -1325,7 +1235,7 @@ fig.update_layout(
     yaxis={
         "tickmode": "array",
         "tickvals": [0, 1],
-        "ticktext": ["Ideal", "Participant"]
+        "ticktext": ["Ideal", "Participant"],
     },
     height=400,
     template="plotly_dark",
@@ -1334,10 +1244,7 @@ fig.update_layout(
 )
 
 
-st.plotly_chart(
-    fig,
-    use_container_width=True
-)
+st.plotly_chart(fig, use_container_width=True)
 
 
 # ============================================================
@@ -1353,19 +1260,11 @@ render_html(
     """
 )
 
-tab1, tab2, tab3 = st.tabs(
-    [
-        "📈 Pitch / F0",
-        "🔊 Energy",
-        "🧠 MFCC"
-    ]
-)
+tab1, tab2, tab3 = st.tabs(["📈 Pitch / F0", "🔊 Energy", "🧠 MFCC"])
 
 
 with tab1:
-
     fig = comparison_chart(
-
         ideal["times"],
         ideal["f0"],
         flawed["times"],
@@ -1373,14 +1272,13 @@ with tab1:
         "Pitch / F0 Over Time",
         "Frequency (Hz)",
         detected_start,
-        detected_end
+        detected_end,
     )
 
     st.plotly_chart(fig, use_container_width=True)
 
 
 with tab2:
-
     fig = comparison_chart(
         ideal["times"],
         ideal["rms"],
@@ -1389,27 +1287,21 @@ with tab2:
         "Vocal Energy Over Time",
         "RMS Energy",
         detected_start,
-        detected_end
+        detected_end,
     )
 
     st.plotly_chart(fig, use_container_width=True)
 
 
 with tab3:
-
-    times = librosa.times_like(
-
-        flawed["mfcc"],
-        sr=flawed_sr,
-        hop_length=512
-    )
+    times = librosa.times_like(flawed["mfcc"], sr=flawed_sr, hop_length=512)
 
     fig = go.Figure(
         data=go.Heatmap(
             z=flawed["mfcc"],
             x=times,
-            y=[f"MFCC {i+1}" for i in range(flawed["mfcc"].shape[0])],
-            colorscale="Viridis"
+            y=[f"MFCC {i + 1}" for i in range(flawed["mfcc"].shape[0])],
+            colorscale="Viridis",
         )
     )
 
@@ -1419,7 +1311,7 @@ with tab3:
         height=500,
         template="plotly_dark",
         paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="#091625"
+        plot_bgcolor="#091625",
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -1447,8 +1339,7 @@ def rolling_variation(values, window=20):
     output = np.zeros_like(clean)
 
     for i in range(window, len(clean)):
-
-        output[i] = np.std(clean[i - window:i])
+        output[i] = np.std(clean[i - window : i])
 
     return output
 
@@ -1464,9 +1355,8 @@ fig = comparison_chart(
     flawed_var,
     "Pitch Variation Over Time",
     "Variation",
-
     detected_start,
-    detected_end
+    detected_end,
 )
 
 st.plotly_chart(fig, use_container_width=True)
@@ -1497,10 +1387,9 @@ fig.add_trace(
     go.Scatter(
         x=frequencies[mask],
         y=spectrum[mask],
-
         mode="lines",
         line={"color": "#a78bfa", "width": 2},
-        name="FFT"
+        name="FFT",
     )
 )
 
@@ -1511,7 +1400,7 @@ fig.update_layout(
     height=420,
     template="plotly_dark",
     paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="#091625"
+    plot_bgcolor="#091625",
 )
 
 st.plotly_chart(fig, use_container_width=True)
@@ -1565,16 +1454,13 @@ render_html(
 
 
 if mode == "Evaluation / Ground Truth":
-
     if ground_start is None or ground_end is None or ground_end <= ground_start:
-
         st.warning(
             "Enter a valid ground-truth interval in the sidebar "
             "(end must be greater than start) to compute metrics."
         )
 
     else:
-
         intersection_start = max(detected_start, ground_start)
         intersection_end = min(detected_end, ground_end)
 
@@ -1596,7 +1482,6 @@ if mode == "Evaluation / Ground Truth":
 
         e1, e2, e3, e4 = st.columns(4)
 
-
         e1.metric("Temporal IoU", f"{iou * 100:.2f}%")
         e2.metric("Precision", f"{precision * 100:.2f}%")
         e3.metric("Recall", f"{recall * 100:.2f}%")
@@ -1610,7 +1495,6 @@ if mode == "Evaluation / Ground Truth":
         )
 
 else:
-
     detected_duration = detected_end - detected_start
     share = 100 * detected_duration / flawed["duration"] if flawed["duration"] else 0.0
 
@@ -1645,7 +1529,6 @@ render_html(
 c1, c2 = st.columns(2)
 
 with c1:
-
     render_html(
         f"""
         <div class="info-card">
@@ -1662,8 +1545,6 @@ with c1:
     )
 
 with c2:
-
-
     render_html(
         f"""
         <div class="info-card">

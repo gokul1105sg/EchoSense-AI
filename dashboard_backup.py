@@ -414,116 +414,63 @@ BASE_DIR = Path(__file__).resolve().parent
 
 DATASET_DIR = BASE_DIR / "dataset"
 
-IDEAL_DEFAULT = (
-    DATASET_DIR
-    / "ideal"
-    / "speech1.wav"
-)
+IDEAL_DEFAULT = DATASET_DIR / "ideal" / "speech1.wav"
 
-FLAWED_DEFAULT = (
-    DATASET_DIR
-    / "flawed"
-    / "flawed1.wav"
-)
+FLAWED_DEFAULT = DATASET_DIR / "flawed" / "flawed1.wav"
 
-RESULT_FILE = (
-    BASE_DIR
-    / "track_c_result.json"
-)
+RESULT_FILE = BASE_DIR / "track_c_result.json"
 
 
 # ============================================================
 # AUDIO LOADING
 # ============================================================
 
+
 def load_audio(path):
 
-    return librosa.load(
-        str(path),
-        sr=16000,
-        mono=True
-    )
+    return librosa.load(str(path), sr=16000, mono=True)
 
 
 # ============================================================
 # FEATURE ANALYSIS
 # ============================================================
 
-def feature_analysis(
-    y,
-    sr
-):
+
+def feature_analysis(y, sr):
 
     hop = 512
 
-    rms = librosa.feature.rms(
-        y=y,
-        frame_length=1024,
-        hop_length=hop
-    )[0]
+    rms = librosa.feature.rms(y=y, frame_length=1024, hop_length=hop)[0]
 
     f0, _, _ = librosa.pyin(
-        y,
-        fmin=70,
-        fmax=400,
-        sr=sr,
-        frame_length=2048,
-        hop_length=hop
+        y, fmin=70, fmax=400, sr=sr, frame_length=2048, hop_length=hop
     )
 
-    mfcc = librosa.feature.mfcc(
-        y=y,
-        sr=sr,
-        n_mfcc=13,
-        hop_length=hop
-    )
+    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13, hop_length=hop)
 
-    times = librosa.times_like(
-        rms,
-        sr=sr,
-        hop_length=hop
-    )
+    times = librosa.times_like(rms, sr=sr, hop_length=hop)
 
-    pitch_clean = f0[
-        ~np.isnan(f0)
-    ]
+    pitch_clean = f0[~np.isnan(f0)]
 
     if len(pitch_clean) > 0:
+        avg_pitch = float(np.mean(pitch_clean))
 
-        avg_pitch = float(
-            np.mean(pitch_clean)
-        )
-
-        pitch_variation = float(
-            np.std(pitch_clean)
-        )
+        pitch_variation = float(np.std(pitch_clean))
 
     else:
-
         avg_pitch = 0
 
         pitch_variation = 0
 
     return {
-
         "times": times,
-
         "rms": rms,
-
         "f0": f0,
-
         "mfcc": mfcc,
-
         "avg_pitch": avg_pitch,
-
-        "pitch_variation":
-            pitch_variation,
-
-        "avg_energy":
-            float(np.mean(rms)),
-
-        "duration":
-            float(len(y) / sr),
+        "pitch_variation": pitch_variation,
+        "avg_energy": float(np.mean(rms)),
+        "duration": float(len(y) / sr),
     }
 
 
@@ -531,37 +478,20 @@ def feature_analysis(
 # SAFE NUMBER
 # ============================================================
 
-def safe_number(
-    data,
-    keys,
-    default=None
-):
+
+def safe_number(data, keys, default=None):
 
     for key in keys:
-
         value = data.get(key)
 
-        if isinstance(
-            value,
-            (int, float)
-        ):
-
+        if isinstance(value, (int, float)):
             return float(value)
 
-        if isinstance(
-            value,
-            str
-        ):
-
+        if isinstance(value, str):
             try:
-
                 return float(value)
 
-            except (
-                ValueError,
-                TypeError
-            ):
-
+            except (ValueError, TypeError):
                 pass
 
     return default
@@ -571,12 +501,8 @@ def safe_number(
 # NESTED RESULT READER
 # ============================================================
 
-def result_get(
-    result,
-    paths,
-    default=None
-):
 
+def result_get(result, paths, default=None):
     """
     Supports both:
 
@@ -588,31 +514,19 @@ def result_get(
     """
 
     for path in paths:
-
         current = result
 
         try:
-
             for key in path.split("."):
-
-                if (
-                    not isinstance(
-                        current,
-                        dict
-                    )
-                    or key not in current
-                ):
-
+                if not isinstance(current, dict) or key not in current:
                     raise KeyError
 
                 current = current[key]
 
             if current is not None:
-
                 return current
 
         except KeyError:
-
             continue
 
     return default
@@ -622,48 +536,24 @@ def result_get(
 # CLEAN FLAW TYPE
 # ============================================================
 
-def clean_flaw_type(
-    value
-):
 
-    if isinstance(
-        value,
-        dict
-    ):
+def clean_flaw_type(value):
 
-        for key in [
-
-            "Type",
-            "type",
-            "flaw_type",
-            "name",
-            "label"
-
-        ]:
-
+    if isinstance(value, dict):
+        for key in ["Type", "type", "flaw_type", "name", "label"]:
             if key in value:
-
-                return clean_flaw_type(
-                    value[key]
-                )
+                return clean_flaw_type(value[key])
 
         return "Excessive Speech Rate"
 
     if value is None:
-
         return "Excessive Speech Rate"
 
     value = str(value)
 
-    value = value.replace(
-        "_",
-        " "
-    )
+    value = value.replace("_", " ")
 
-    value = value.replace(
-        "-",
-        " "
-    )
+    value = value.replace("-", " ")
 
     return value.title()
 
@@ -672,26 +562,17 @@ def clean_flaw_type(
 # LOAD RESULT
 # ============================================================
 
+
 def load_result():
 
     if not RESULT_FILE.exists():
-
         return {}
 
     try:
-
-        with open(
-            RESULT_FILE,
-            encoding="utf-8"
-        ) as f:
-
+        with open(RESULT_FILE, encoding="utf-8") as f:
             return json.load(f)
 
-    except (
-        OSError,
-        json.JSONDecodeError
-    ):
-
+    except (OSError, json.JSONDecodeError):
         return {}
 
 
@@ -699,40 +580,21 @@ def load_result():
 # HIGHLIGHT REGION
 # ============================================================
 
-def highlight_region(
-    fig,
-    start,
-    end,
-    color,
-    label
-):
 
-    if (
-        start is None
-        or end is None
-    ):
+def highlight_region(fig, start, end, color, label):
 
+    if start is None or end is None:
         return
 
     fig.add_vrect(
-
         x0=start,
-
         x1=end,
-
         fillcolor=color,
-
         opacity=0.16,
-
         line_width=0,
-
         annotation_text=label,
-
         annotation_position="top left",
-
-        annotation_font={
-            "color": color
-        }
+        annotation_font={"color": color},
     )
 
 
@@ -740,105 +602,45 @@ def highlight_region(
 # COMPARISON CHART
 # ============================================================
 
+
 def comparison_chart(
-    ideal_time,
-    ideal_value,
-    flawed_time,
-    flawed_value,
-    title,
-    y_title,
-    start,
-    end
+    ideal_time, ideal_value, flawed_time, flawed_value, title, y_title, start, end
 ):
 
     fig = go.Figure()
 
     fig.add_trace(
-
         go.Scatter(
-
             x=ideal_time,
-
             y=ideal_value,
-
             mode="lines",
-
             name="Ideal",
-
-            line={
-                "color": "#60a5fa",
-                "width": 2
-            }
+            line={"color": "#60a5fa", "width": 2},
         )
     )
 
     fig.add_trace(
-
         go.Scatter(
-
             x=flawed_time,
-
             y=flawed_value,
-
             mode="lines",
-
             name="Participant",
-
-            line={
-                "color": "#fb7185",
-                "width": 2
-            }
+            line={"color": "#fb7185", "width": 2},
         )
     )
 
-    highlight_region(
-
-        fig,
-
-        start,
-
-        end,
-
-        "#ef4444",
-
-        "Detected flaw"
-    )
+    highlight_region(fig, start, end, "#ef4444", "Detected flaw")
 
     fig.update_layout(
-
-        title={
-
-            "text": title,
-
-            "font": {
-                "size": 18,
-                "color": "#e5edf7"
-            }
-        },
-
+        title={"text": title, "font": {"size": 18, "color": "#e5edf7"}},
         xaxis_title="Time (seconds)",
-
         yaxis_title=y_title,
-
         height=430,
-
         template="plotly_dark",
-
         paper_bgcolor="rgba(0,0,0,0)",
-
         plot_bgcolor="#091625",
-
-        margin={
-            "l": 45,
-            "r": 20,
-            "t": 55,
-            "b": 45
-        },
-
-        legend={
-            "orientation": "h",
-            "y": 1.08
-        }
+        margin={"l": 45, "r": 20, "t": 55, "b": 45},
+        legend={"orientation": "h", "y": 1.08},
     )
 
     return fig
@@ -875,7 +677,6 @@ st.html(
 # ============================================================
 
 with st.sidebar:
-
     st.html(
         """
         <div style="
@@ -898,36 +699,19 @@ with st.sidebar:
     )
 
     mode = st.radio(
-
-        "Analysis Mode",
-
-        [
-            "Prediction / Analysis",
-            "Evaluation / Ground Truth"
-        ]
+        "Analysis Mode", ["Prediction / Analysis", "Evaluation / Ground Truth"]
     )
 
     st.divider()
 
-    st.markdown(
-        "### Dataset"
-    )
+    st.markdown("### Dataset")
 
     st.code(
-
-        "dataset/\n"
-        "├── ideal/\n"
-        "│   └── speech1.wav\n"
-        "└── flawed/\n"
-        "    └── flawed1.wav",
-
-        language="text"
+        "dataset/\n├── ideal/\n│   └── speech1.wav\n└── flawed/\n    └── flawed1.wav",
+        language="text",
     )
 
-    st.caption(
-        "Prediction mode does not require "
-        "ground-truth labels."
-    )
+    st.caption("Prediction mode does not require ground-truth labels.")
 
 
 # ============================================================
@@ -955,38 +739,24 @@ c1, c2 = st.columns(2)
 
 
 with c1:
-
-    st.markdown(
-        "### 🎯 Ideal / Baseline"
-    )
+    st.markdown("### 🎯 Ideal / Baseline")
 
     ideal_upload = st.file_uploader(
-
         "Upload ideal WAV",
-
         type=["wav"],
-
         key="ideal_upload",
-
-        label_visibility="collapsed"
+        label_visibility="collapsed",
     )
 
 
 with c2:
-
-    st.markdown(
-        "### 🧑 Participant / Flawed"
-    )
+    st.markdown("### 🧑 Participant / Flawed")
 
     flawed_upload = st.file_uploader(
-
         "Upload participant WAV",
-
         type=["wav"],
-
         key="flawed_upload",
-
-        label_visibility="collapsed"
+        label_visibility="collapsed",
     )
 
 
@@ -995,56 +765,27 @@ with c2:
 # ============================================================
 
 if ideal_upload:
+    ideal_path = BASE_DIR / "_dashboard_ideal.wav"
 
-    ideal_path = (
-        BASE_DIR
-        / "_dashboard_ideal.wav"
-    )
-
-    with open(
-        ideal_path,
-        "wb"
-    ) as f:
-
-        f.write(
-            ideal_upload.getvalue()
-        )
+    with open(ideal_path, "wb") as f:
+        f.write(ideal_upload.getvalue())
 
 else:
-
     ideal_path = IDEAL_DEFAULT
 
 
 if flawed_upload:
+    flawed_path = BASE_DIR / "_dashboard_flawed.wav"
 
-    flawed_path = (
-        BASE_DIR
-        / "_dashboard_flawed.wav"
-    )
-
-    with open(
-        flawed_path,
-        "wb"
-    ) as f:
-
-        f.write(
-            flawed_upload.getvalue()
-        )
+    with open(flawed_path, "wb") as f:
+        f.write(flawed_upload.getvalue())
 
 else:
-
     flawed_path = FLAWED_DEFAULT
 
 
-if (
-    not ideal_path.exists()
-    or not flawed_path.exists()
-):
-
-    st.warning(
-        "Please provide both ideal "
-        "and participant WAV files."
-    )
+if not ideal_path.exists() or not flawed_path.exists():
+    st.warning("Please provide both ideal and participant WAV files.")
 
     st.stop()
 
@@ -1074,64 +815,31 @@ c1, c2 = st.columns(2)
 
 
 with c1:
+    st.markdown("**Ideal Speech**")
 
-    st.markdown(
-        "**Ideal Speech**"
-    )
-
-    with open(
-        ideal_path,
-        "rb"
-    ) as f:
-
-        st.audio(
-            f.read(),
-            format="audio/wav"
-        )
+    with open(ideal_path, "rb") as f:
+        st.audio(f.read(), format="audio/wav")
 
 
 with c2:
+    st.markdown("**Participant Speech**")
 
-    st.markdown(
-        "**Participant Speech**"
-    )
-
-    with open(
-        flawed_path,
-        "rb"
-    ) as f:
-
-        st.audio(
-            f.read(),
-            format="audio/wav"
-        )
+    with open(flawed_path, "rb") as f:
+        st.audio(f.read(), format="audio/wav")
 
 
 # ============================================================
 # AUDIO ANALYSIS
 # ============================================================
 
-with st.spinner(
-    "Analyzing acoustic features..."
-):
+with st.spinner("Analyzing acoustic features..."):
+    ideal_y, ideal_sr = load_audio(ideal_path)
 
-    ideal_y, ideal_sr = load_audio(
-        ideal_path
-    )
+    flawed_y, flawed_sr = load_audio(flawed_path)
 
-    flawed_y, flawed_sr = load_audio(
-        flawed_path
-    )
+    ideal = feature_analysis(ideal_y, ideal_sr)
 
-    ideal = feature_analysis(
-        ideal_y,
-        ideal_sr
-    )
-
-    flawed = feature_analysis(
-        flawed_y,
-        flawed_sr
-    )
+    flawed = feature_analysis(flawed_y, flawed_sr)
 
 
 # ============================================================
@@ -1146,21 +854,10 @@ result = load_result()
 # ============================================================
 
 flaw_type = clean_flaw_type(
-
     result_get(
-
         result,
-
-        [
-            "flaw_type",
-            "flaw.type",
-            "flaw.Type",
-            "flaw.name",
-            "flaw.label",
-            "flaw"
-        ],
-
-        "Excessive Speech Rate"
+        ["flaw_type", "flaw.type", "flaw.Type", "flaw.name", "flaw.label", "flaw"],
+        "Excessive Speech Rate",
     )
 )
 
@@ -1169,21 +866,7 @@ flaw_type = clean_flaw_type(
 # SEVERITY
 # ============================================================
 
-severity = str(
-
-    result_get(
-
-        result,
-
-        [
-            "severity",
-            "flaw.severity"
-        ],
-
-        "HIGH"
-    )
-
-).upper()
+severity = str(result_get(result, ["severity", "flaw.severity"], "HIGH")).upper()
 
 
 # ============================================================
@@ -1191,25 +874,9 @@ severity = str(
 # ============================================================
 
 causal_score = safe_number(
-
-    {
-        "value": result_get(
-
-            result,
-
-            [
-                "causal_score",
-                "flaw.causal_score",
-                "score"
-            ],
-
-            85
-        )
-    },
-
+    {"value": result_get(result, ["causal_score", "flaw.causal_score", "score"], 85)},
     ["value"],
-
-    85
+    85,
 )
 
 
@@ -1218,24 +885,9 @@ causal_score = safe_number(
 # ============================================================
 
 confidence = safe_number(
-
-    {
-        "value": result_get(
-
-            result,
-
-            [
-                "confidence",
-                "flaw.confidence"
-            ],
-
-            1.0
-        )
-    },
-
+    {"value": result_get(result, ["confidence", "flaw.confidence"], 1.0)},
     ["value"],
-
-    1.0
+    1.0,
 )
 
 
@@ -1244,48 +896,28 @@ confidence = safe_number(
 # ============================================================
 
 detected_start = safe_number(
-
     {
         "value": result_get(
-
             result,
-
-            [
-                "detected_start",
-                "temporal_grounding.detected.start",
-                "region_start"
-            ],
-
-            2.02
+            ["detected_start", "temporal_grounding.detected.start", "region_start"],
+            2.02,
         )
     },
-
     ["value"],
-
-    2.02
+    2.02,
 )
 
 
 detected_end = safe_number(
-
     {
         "value": result_get(
-
             result,
-
-            [
-                "detected_end",
-                "temporal_grounding.detected.end",
-                "region_end"
-            ],
-
-            7.40
+            ["detected_end", "temporal_grounding.detected.end", "region_end"],
+            7.40,
         )
     },
-
     ["value"],
-
-    7.40
+    7.40,
 )
 
 
@@ -1294,48 +926,32 @@ detected_end = safe_number(
 # ============================================================
 
 ground_start = safe_number(
-
     {
         "value": result_get(
-
             result,
-
             [
                 "ground_truth_start",
                 "temporal_grounding.ground_truth.start",
-                "ground_start"
+                "ground_start",
             ],
-
-            2.64
+            2.64,
         )
     },
-
     ["value"],
-
-    2.64
+    2.64,
 )
 
 
 ground_end = safe_number(
-
     {
         "value": result_get(
-
             result,
-
-            [
-                "ground_truth_end",
-                "temporal_grounding.ground_truth.end",
-                "ground_end"
-            ],
-
-            7.40
+            ["ground_truth_end", "temporal_grounding.ground_truth.end", "ground_end"],
+            7.40,
         )
     },
-
     ["value"],
-
-    7.40
+    7.40,
 )
 
 
@@ -1344,118 +960,84 @@ ground_end = safe_number(
 # ============================================================
 
 rate_change = safe_number(
-
     {
         "value": result_get(
-
             result,
-
             [
                 "regional_speech_rate_change",
                 "feature_changes.speech_rate_percent",
                 "speech_rate_change",
-                "rate_change"
+                "rate_change",
             ],
-
-            67.80
+            67.80,
         )
     },
-
     ["value"],
-
-    67.80
+    67.80,
 )
 
 
 energy_change = safe_number(
-
     {
         "value": result_get(
-
             result,
-
             [
                 "regional_energy_change",
                 "feature_changes.energy_percent",
-                "energy_change"
+                "energy_change",
             ],
-
-            -14.78
+            -14.78,
         )
     },
-
     ["value"],
-
-    -14.78
+    -14.78,
 )
 
 
 pitch_change = safe_number(
-
     {
         "value": result_get(
-
             result,
-
-            [
-                "regional_pitch_change",
-                "feature_changes.pitch_percent",
-                "pitch_change"
-            ],
-
-            6.92
+            ["regional_pitch_change", "feature_changes.pitch_percent", "pitch_change"],
+            6.92,
         )
     },
-
     ["value"],
-
-    6.92
+    6.92,
 )
 
 
 pitch_variation_change = safe_number(
-
     {
         "value": result_get(
-
             result,
-
             [
                 "regional_pitch_variation_change",
                 "feature_changes.pitch_variation_percent",
-                "pitch_variation_change"
+                "pitch_variation_change",
             ],
-
-            -48.83
+            -48.83,
         )
     },
-
     ["value"],
-
-    -48.83
+    -48.83,
 )
 
 
 mfcc_distance = safe_number(
-
     {
         "value": result_get(
-
             result,
-
             [
                 "regional_mfcc_distance",
                 "feature_changes.mfcc_distance",
-                "mfcc_distance"
+                "mfcc_distance",
             ],
-
-            76.09
+            76.09,
         )
     },
-
     ["value"],
-
-    76.09
+    76.09,
 )
 
 
@@ -1464,39 +1046,22 @@ mfcc_distance = safe_number(
 # ============================================================
 
 explanation = result_get(
-
-    result,
-
-    [
-        "causal_explanation",
-        "flaw.explanation",
-        "explanation"
-    ],
-
-    ""
+    result, ["causal_explanation", "flaw.explanation", "explanation"], ""
 )
 
 
 if not explanation:
-
     explanation = (
-
         f"The participant speech between "
-
         f"{ground_start:.2f}s and "
         f"{ground_end:.2f}s "
-
         f"was delivered "
         f"{rate_change:.2f}% faster than "
-
         f"the corresponding ideal region. "
-
         f"Vocal energy changed by "
         f"{energy_change:.2f}%, "
-
         f"while pitch variation changed by "
         f"{pitch_variation_change:.2f}%. "
-
         f"These region-specific acoustic "
         f"measurements support the "
         f"identification of excessive "
@@ -1509,18 +1074,12 @@ if not explanation:
 # ============================================================
 
 recommendation = result_get(
-
     result,
-
-    [
-        "recommendation",
-        "flaw.recommendation"
-    ],
-
+    ["recommendation", "flaw.recommendation"],
     "Slow down during the highlighted "
     "region. Introduce short pauses "
     "between major phrases and clearly "
-    "pronounce important words."
+    "pronounce important words.",
 )
 
 
@@ -1549,9 +1108,7 @@ k1, k2, k3, k4 = st.columns(4)
 
 
 with k1:
-
     st.html(
-
         f"""
         <div class="kpi">
 
@@ -1569,9 +1126,7 @@ with k1:
 
 
 with k2:
-
     st.html(
-
         f"""
         <div class="kpi">
 
@@ -1589,9 +1144,7 @@ with k2:
 
 
 with k3:
-
     st.html(
-
         f"""
         <div class="kpi">
 
@@ -1617,9 +1170,7 @@ with k3:
 
 
 with k4:
-
     st.html(
-
         f"""
         <div class="kpi">
 
@@ -1661,52 +1212,17 @@ m1, m2, m3, m4, m5 = st.columns(5)
 
 
 metrics = [
-
-    (
-        "Speech Rate",
-        f"{rate_change:+.2f}%",
-        "kpi-red"
-    ),
-
-    (
-        "Energy",
-        f"{energy_change:+.2f}%",
-        "kpi-purple"
-    ),
-
-    (
-        "Pitch",
-        f"{pitch_change:+.2f}%",
-        "kpi-blue"
-    ),
-
-    (
-        "Pitch Variation",
-        f"{pitch_variation_change:+.2f}%",
-        "kpi-red"
-    ),
-
-    (
-        "MFCC Distance",
-        f"{mfcc_distance:.2f}",
-        "kpi-purple"
-    ),
+    ("Speech Rate", f"{rate_change:+.2f}%", "kpi-red"),
+    ("Energy", f"{energy_change:+.2f}%", "kpi-purple"),
+    ("Pitch", f"{pitch_change:+.2f}%", "kpi-blue"),
+    ("Pitch Variation", f"{pitch_variation_change:+.2f}%", "kpi-red"),
+    ("MFCC Distance", f"{mfcc_distance:.2f}", "kpi-purple"),
 ]
 
 
-for col, (
-    label,
-    value,
-    color_class
-) in zip(
-    [m1, m2, m3, m4, m5],
-    metrics
-):
-
+for col, (label, value, color_class) in zip([m1, m2, m3, m4, m5], metrics):
     with col:
-
         st.html(
-
             f"""
             <div class="kpi">
 
@@ -1749,129 +1265,54 @@ fig = go.Figure()
 
 # Ideal baseline
 fig.add_trace(
-
     go.Scatter(
-
         x=ideal["times"],
-
-        y=np.zeros_like(
-            ideal["times"]
-        ),
-
+        y=np.zeros_like(ideal["times"]),
         mode="lines",
-
         name="Ideal",
-
-        line={
-            "color": "#60a5fa",
-            "width": 2
-        }
+        line={"color": "#60a5fa", "width": 2},
     )
 )
 
 
 # Participant
 fig.add_trace(
-
     go.Scatter(
-
         x=flawed["times"],
-
-        y=np.ones_like(
-            flawed["times"]
-        ),
-
+        y=np.ones_like(flawed["times"]),
         mode="lines",
-
         name="Participant",
-
-        line={
-            "color": "#fb7185",
-            "width": 2
-        }
+        line={"color": "#fb7185", "width": 2},
     )
 )
 
 
 # Detected region
-highlight_region(
-
-    fig,
-
-    detected_start,
-
-    detected_end,
-
-    "#ef4444",
-
-    "Detected flaw"
-)
+highlight_region(fig, detected_start, detected_end, "#ef4444", "Detected flaw")
 
 
 # Ground truth
 if mode == "Evaluation / Ground Truth":
-
-    highlight_region(
-
-        fig,
-
-        ground_start,
-
-        ground_end,
-
-        "#22c55e",
-
-        "Ground truth"
-    )
+    highlight_region(fig, ground_start, ground_end, "#22c55e", "Ground truth")
 
 
 fig.update_layout(
-
-    title=(
-        "Where did the system "
-        "find the problem?"
-    ),
-
+    title=("Where did the system find the problem?"),
     xaxis_title="Time (seconds)",
-
     yaxis={
-
         "tickmode": "array",
-
-        "tickvals": [
-            0,
-            1
-        ],
-
-        "ticktext": [
-            "Ideal",
-            "Participant"
-        ]
+        "tickvals": [0, 1],
+        "ticktext": ["Ideal", "Participant"],
     },
-
     height=400,
-
     template="plotly_dark",
-
     paper_bgcolor="rgba(0,0,0,0)",
-
     plot_bgcolor="#091625",
-
-    margin={
-        "l": 45,
-        "r": 20,
-        "t": 55,
-        "b": 45
-    }
+    margin={"l": 45, "r": 20, "t": 55, "b": 45},
 )
 
 
-st.plotly_chart(
-
-    fig,
-
-    use_container_width=True
-)
+st.plotly_chart(fig, use_container_width=True)
 
 
 # ============================================================
@@ -1895,14 +1336,7 @@ st.html(
 )
 
 
-tab1, tab2, tab3 = st.tabs(
-
-    [
-        "📈 Pitch / F0",
-        "🔊 Energy",
-        "🧠 MFCC"
-    ]
-)
+tab1, tab2, tab3 = st.tabs(["📈 Pitch / F0", "🔊 Energy", "🧠 MFCC"])
 
 
 # ============================================================
@@ -1910,32 +1344,18 @@ tab1, tab2, tab3 = st.tabs(
 # ============================================================
 
 with tab1:
-
     fig = comparison_chart(
-
         ideal["times"],
-
         ideal["f0"],
-
         flawed["times"],
-
         flawed["f0"],
-
         "Pitch / F0 Over Time",
-
         "Frequency (Hz)",
-
         detected_start,
-
-        detected_end
+        detected_end,
     )
 
-    st.plotly_chart(
-
-        fig,
-
-        use_container_width=True
-    )
+    st.plotly_chart(fig, use_container_width=True)
 
 
 # ============================================================
@@ -1943,32 +1363,18 @@ with tab1:
 # ============================================================
 
 with tab2:
-
     fig = comparison_chart(
-
         ideal["times"],
-
         ideal["rms"],
-
         flawed["times"],
-
         flawed["rms"],
-
         "Vocal Energy Over Time",
-
         "RMS Energy",
-
         detected_start,
-
-        detected_end
+        detected_end,
     )
 
-    st.plotly_chart(
-
-        fig,
-
-        use_container_width=True
-    )
+    st.plotly_chart(fig, use_container_width=True)
 
 
 # ============================================================
@@ -1976,71 +1382,28 @@ with tab2:
 # ============================================================
 
 with tab3:
-
-    times = librosa.times_like(
-
-        flawed["mfcc"],
-
-        sr=flawed_sr,
-
-        hop_length=512
-    )
-
+    times = librosa.times_like(flawed["mfcc"], sr=flawed_sr, hop_length=512)
 
     fig = go.Figure(
-
         data=go.Heatmap(
-
             z=flawed["mfcc"],
-
             x=times,
-
-            y=[
-
-                f"MFCC {i+1}"
-
-                for i in range(
-                    flawed["mfcc"].shape[0]
-                )
-            ],
-
-            colorscale="Viridis"
+            y=[f"MFCC {i + 1}" for i in range(flawed["mfcc"].shape[0])],
+            colorscale="Viridis",
         )
     )
 
-
     fig.update_layout(
-
-        title=(
-            "Participant MFCC "
-            "Representation"
-        ),
-
+        title=("Participant MFCC Representation"),
         xaxis_title="Time (seconds)",
-
         height=500,
-
         template="plotly_dark",
-
         paper_bgcolor="rgba(0,0,0,0)",
-
         plot_bgcolor="#091625",
-
-        margin={
-            "l": 55,
-            "r": 20,
-            "t": 55,
-            "b": 45
-        }
+        margin={"l": 55, "r": 20, "t": 55, "b": 45},
     )
 
-
-    st.plotly_chart(
-
-        fig,
-
-        use_container_width=True
-    )
+    st.plotly_chart(fig, use_container_width=True)
 
 
 # ============================================================
@@ -2064,71 +1427,37 @@ st.html(
 )
 
 
-def rolling_variation(
-    values,
-    window=20
-):
+def rolling_variation(values, window=20):
 
-    clean = np.nan_to_num(
-        values,
-        nan=0
-    )
+    clean = np.nan_to_num(values, nan=0)
 
-    output = np.zeros_like(
-        clean
-    )
+    output = np.zeros_like(clean)
 
-    for i in range(
-        window,
-        len(clean)
-    ):
-
-        output[i] = np.std(
-
-            clean[
-                i-window:i
-            ]
-        )
+    for i in range(window, len(clean)):
+        output[i] = np.std(clean[i - window : i])
 
     return output
 
 
-ideal_var = rolling_variation(
-    ideal["f0"]
-)
+ideal_var = rolling_variation(ideal["f0"])
 
 
-flawed_var = rolling_variation(
-    flawed["f0"]
-)
+flawed_var = rolling_variation(flawed["f0"])
 
 
 fig = comparison_chart(
-
     ideal["times"],
-
     ideal_var,
-
     flawed["times"],
-
     flawed_var,
-
     "Pitch Variation Over Time",
-
     "Variation",
-
     detected_start,
-
-    detected_end
+    detected_end,
 )
 
 
-st.plotly_chart(
-
-    fig,
-
-    use_container_width=True
-)
+st.plotly_chart(fig, use_container_width=True)
 
 
 # ============================================================
@@ -2152,20 +1481,10 @@ st.html(
 )
 
 
-spectrum = np.abs(
-
-    np.fft.rfft(
-        flawed_y
-    )
-)
+spectrum = np.abs(np.fft.rfft(flawed_y))
 
 
-frequencies = np.fft.rfftfreq(
-
-    len(flawed_y),
-
-    d=1 / flawed_sr
-)
+frequencies = np.fft.rfftfreq(len(flawed_y), d=1 / flawed_sr)
 
 
 mask = frequencies <= 4000
@@ -2175,61 +1494,29 @@ fig = go.Figure()
 
 
 fig.add_trace(
-
     go.Scatter(
-
         x=frequencies[mask],
-
         y=spectrum[mask],
-
         mode="lines",
-
-        line={
-
-            "color": "#a78bfa",
-
-            "width": 2
-        },
-
-        name="FFT"
+        line={"color": "#a78bfa", "width": 2},
+        name="FFT",
     )
 )
 
 
 fig.update_layout(
-
-    title=(
-        "Participant Speech "
-        "FFT Spectrum"
-    ),
-
+    title=("Participant Speech FFT Spectrum"),
     xaxis_title="Frequency (Hz)",
-
     yaxis_title="Magnitude",
-
     height=420,
-
     template="plotly_dark",
-
     paper_bgcolor="rgba(0,0,0,0)",
-
     plot_bgcolor="#091625",
-
-    margin={
-        "l": 55,
-        "r": 20,
-        "t": 55,
-        "b": 45
-    }
+    margin={"l": 55, "r": 20, "t": 55, "b": 45},
 )
 
 
-st.plotly_chart(
-
-    fig,
-
-    use_container_width=True
-)
+st.plotly_chart(fig, use_container_width=True)
 
 
 # ============================================================
@@ -2254,7 +1541,6 @@ st.html(
 
 
 st.html(
-
     f"""
     <div class="explanation">
 
@@ -2272,7 +1558,6 @@ st.html(
 
 
 st.html(
-
     f"""
     <div class="recommendation">
 
@@ -2311,150 +1596,41 @@ st.html(
 
 
 if mode == "Evaluation / Ground Truth":
+    intersection_start = max(detected_start, ground_start)
 
-    intersection_start = max(
+    intersection_end = min(detected_end, ground_end)
 
-        detected_start,
+    intersection = max(0, intersection_end - intersection_start)
 
-        ground_start
-    )
+    detected_duration = detected_end - detected_start
 
+    ground_duration = ground_end - ground_start
 
-    intersection_end = min(
+    union = detected_duration + ground_duration - intersection
 
-        detected_end,
+    iou = intersection / union if union > 0 else 0
 
-        ground_end
-    )
+    precision = intersection / detected_duration if detected_duration > 0 else 0
 
+    recall = intersection / ground_duration if ground_duration > 0 else 0
 
-    intersection = max(
-
-        0,
-
-        intersection_end
-        - intersection_start
-    )
-
-
-    detected_duration = (
-
-        detected_end
-        - detected_start
-    )
-
-
-    ground_duration = (
-
-        ground_end
-        - ground_start
-    )
-
-
-    union = (
-
-        detected_duration
-
-        + ground_duration
-
-        - intersection
-    )
-
-
-    iou = (
-
-        intersection / union
-
-        if union > 0
-
-        else 0
-    )
-
-
-    precision = (
-
-        intersection
-        / detected_duration
-
-        if detected_duration > 0
-
-        else 0
-    )
-
-
-    recall = (
-
-        intersection
-        / ground_duration
-
-        if ground_duration > 0
-
-        else 0
-    )
-
-
-    f1 = (
-
-        2
-        * precision
-        * recall
-        /
-        (
-            precision
-            + recall
-        )
-
-        if precision + recall > 0
-
-        else 0
-    )
-
+    f1 = 2 * precision * recall / (precision + recall) if precision + recall > 0 else 0
 
     e1, e2, e3, e4 = st.columns(4)
 
-
     with e1:
-
-        st.metric(
-
-            "Temporal IoU",
-
-            f"{iou * 100:.2f}%"
-        )
-
+        st.metric("Temporal IoU", f"{iou * 100:.2f}%")
 
     with e2:
-
-        st.metric(
-
-            "Precision",
-
-            f"{precision * 100:.2f}%"
-        )
-
+        st.metric("Precision", f"{precision * 100:.2f}%")
 
     with e3:
-
-        st.metric(
-
-            "Recall",
-
-            f"{recall * 100:.2f}%"
-        )
-
+        st.metric("Recall", f"{recall * 100:.2f}%")
 
     with e4:
-
-        st.metric(
-
-            "F1 Score",
-
-            f"{f1 * 100:.2f}%"
-        )
-
+        st.metric("F1 Score", f"{f1 * 100:.2f}%")
 
     st.caption(
-
         "Evaluation metrics are calculated "
         "against the available ground-truth "
         "interval. Expand the dataset before "
@@ -2464,9 +1640,7 @@ if mode == "Evaluation / Ground Truth":
 
 
 else:
-
     st.html(
-
         """
         <div class="info-card">
 
@@ -2516,9 +1690,7 @@ c1, c2 = st.columns(2)
 
 
 with c1:
-
     st.html(
-
         f"""
         <div class="info-card">
 
@@ -2563,9 +1735,7 @@ with c1:
 
 
 with c2:
-
     st.html(
-
         f"""
         <div class="info-card">
 
@@ -2614,7 +1784,6 @@ with c2:
 # ============================================================
 
 st.html(
-
     """
     <div class="footer">
 
