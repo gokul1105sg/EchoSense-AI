@@ -1,4 +1,5 @@
 import json
+
 import librosa
 import numpy as np
 import whisper
@@ -220,7 +221,6 @@ def main():
 
     with open(
         GROUND_TRUTH_FILE,
-        "r",
         encoding="utf-8"
     ) as f:
 

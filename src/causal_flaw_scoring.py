@@ -1,6 +1,5 @@
 import json
 
-
 # --------------------------------------------------
 # FEATURE CHANGE VALUES
 # --------------------------------------------------
@@ -231,39 +230,30 @@ def create_explanation(features, flaw):
 # --------------------------------------------------
 
 def create_recommendation(flaw):
-
-    if flaw == "EXCESSIVE SPEECH RATE":
-
-        return (
+    recommendations = {
+        "EXCESSIVE SPEECH RATE": (
             "Slow down during the highlighted region. "
             "Introduce short pauses between major phrases "
             "and clearly pronounce important words."
-        )
-
-    elif flaw == "SLOW SPEECH RATE":
-
-        return (
+        ),
+        "SLOW SPEECH RATE": (
             "Maintain a slightly faster and more consistent "
             "speaking pace. Avoid unnecessary pauses."
-        )
-
-    elif flaw == "LOW VOCAL ENERGY":
-
-        return (
+        ),
+        "LOW VOCAL ENERGY": (
             "Increase vocal strength and maintain a clearer "
             "and more audible delivery."
-        )
-
-    elif flaw == "LOW PITCH VARIATION":
-
-        return (
+        ),
+        "LOW PITCH VARIATION": (
             "Use more natural pitch variation to make the "
             "delivery more expressive and engaging."
-        )
+        ),
+    }
 
-    return (
-        "Compare the highlighted region with the ideal "
-        "reference and improve delivery consistency."
+    return recommendations.get(
+        flaw,
+        "Practice speaking clearly with a natural pace, "
+        "consistent vocal energy, and appropriate pitch variation."
     )
 
 

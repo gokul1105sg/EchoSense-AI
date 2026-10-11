@@ -6,7 +6,6 @@ import numpy as np
 import plotly.graph_objects as go
 import streamlit as st
 
-
 # ============================================================
 # CONFIG
 # ============================================================
@@ -683,7 +682,6 @@ def load_result():
 
         with open(
             RESULT_FILE,
-            "r",
             encoding="utf-8"
         ) as f:
 
@@ -732,9 +730,9 @@ def highlight_region(
 
         annotation_position="top left",
 
-        annotation_font=dict(
-            color=color
-        )
+        annotation_font={
+            "color": color
+        }
     )
 
 
@@ -767,10 +765,10 @@ def comparison_chart(
 
             name="Ideal",
 
-            line=dict(
-                color="#60a5fa",
-                width=2
-            )
+            line={
+                "color": "#60a5fa",
+                "width": 2
+            }
         )
     )
 
@@ -786,10 +784,10 @@ def comparison_chart(
 
             name="Participant",
 
-            line=dict(
-                color="#fb7185",
-                width=2
-            )
+            line={
+                "color": "#fb7185",
+                "width": 2
+            }
         )
     )
 
@@ -808,15 +806,15 @@ def comparison_chart(
 
     fig.update_layout(
 
-        title=dict(
+        title={
 
-            text=title,
+            "text": title,
 
-            font=dict(
-                size=18,
-                color="#e5edf7"
-            )
-        ),
+            "font": {
+                "size": 18,
+                "color": "#e5edf7"
+            }
+        },
 
         xaxis_title="Time (seconds)",
 
@@ -830,17 +828,17 @@ def comparison_chart(
 
         plot_bgcolor="#091625",
 
-        margin=dict(
-            l=45,
-            r=20,
-            t=55,
-            b=45
-        ),
+        margin={
+            "l": 45,
+            "r": 20,
+            "t": 55,
+            "b": 45
+        },
 
-        legend=dict(
-            orientation="h",
-            y=1.08
-        )
+        legend={
+            "orientation": "h",
+            "y": 1.08
+        }
     )
 
     return fig
@@ -1764,10 +1762,10 @@ fig.add_trace(
 
         name="Ideal",
 
-        line=dict(
-            color="#60a5fa",
-            width=2
-        )
+        line={
+            "color": "#60a5fa",
+            "width": 2
+        }
     )
 )
 
@@ -1787,10 +1785,10 @@ fig.add_trace(
 
         name="Participant",
 
-        line=dict(
-            color="#fb7185",
-            width=2
-        )
+        line={
+            "color": "#fb7185",
+            "width": 2
+        }
     )
 )
 
@@ -1836,20 +1834,20 @@ fig.update_layout(
 
     xaxis_title="Time (seconds)",
 
-    yaxis=dict(
+    yaxis={
 
-        tickmode="array",
+        "tickmode": "array",
 
-        tickvals=[
+        "tickvals": [
             0,
             1
         ],
 
-        ticktext=[
+        "ticktext": [
             "Ideal",
             "Participant"
         ]
-    ),
+    },
 
     height=400,
 
@@ -1859,12 +1857,12 @@ fig.update_layout(
 
     plot_bgcolor="#091625",
 
-    margin=dict(
-        l=45,
-        r=20,
-        t=55,
-        b=45
-    )
+    margin={
+        "l": 45,
+        "r": 20,
+        "t": 55,
+        "b": 45
+    }
 )
 
 
@@ -2028,12 +2026,12 @@ with tab3:
 
         plot_bgcolor="#091625",
 
-        margin=dict(
-            l=55,
-            r=20,
-            t=55,
-            b=45
-        )
+        margin={
+            "l": 55,
+            "r": 20,
+            "t": 55,
+            "b": 45
+        }
     )
 
 
@@ -2186,12 +2184,12 @@ fig.add_trace(
 
         mode="lines",
 
-        line=dict(
+        line={
 
-            color="#a78bfa",
+            "color": "#a78bfa",
 
-            width=2
-        ),
+            "width": 2
+        },
 
         name="FFT"
     )
@@ -2217,12 +2215,12 @@ fig.update_layout(
 
     plot_bgcolor="#091625",
 
-    margin=dict(
-        l=55,
-        r=20,
-        t=55,
-        b=45
-    )
+    margin={
+        "l": 55,
+        "r": 20,
+        "t": 55,
+        "b": 45
+    }
 )
 
 

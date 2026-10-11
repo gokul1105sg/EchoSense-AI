@@ -14,7 +14,7 @@ def analyze_speech(path):
     avg_energy = float(np.mean(rms))
 
     # Pitch / F0
-    f0, voiced_flag, voiced_probs = librosa.pyin(
+    f0, _voiced_flag, _voiced_probs = librosa.pyin(
         y,
         fmin=librosa.note_to_hz("C2"),
         fmax=librosa.note_to_hz("C7")
@@ -22,10 +22,7 @@ def analyze_speech(path):
 
     pitch = f0[~np.isnan(f0)]
 
-    if len(pitch) > 0:
-        avg_pitch = float(np.mean(pitch))
-    else:
-        avg_pitch = 0.0
+    avg_pitch = float(np.mean(pitch)) if len(pitch) > 0 else 0.0
 
     # MFCC
     mfcc = librosa.feature.mfcc(

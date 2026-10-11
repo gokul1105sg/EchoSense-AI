@@ -4,10 +4,9 @@ from pathlib import Path
 
 import librosa
 import numpy as np
-import whisper
 import plotly.graph_objects as go
 import streamlit as st
-
+import whisper
 
 # ============================================================
 # CONFIG
@@ -407,9 +406,9 @@ def highlight_region(
         line_width=0,
         annotation_text=label,
         annotation_position="top left",
-        annotation_font=dict(
-            color=color
-        )
+        annotation_font={
+            "color": color
+        }
     )
 
 
@@ -433,10 +432,10 @@ def comparison_chart(
             y=ideal_value,
             mode="lines",
             name="Ideal",
-            line=dict(
-                color="#60a5fa",
-                width=2
-            )
+            line={
+                "color": "#60a5fa",
+                "width": 2
+            }
         )
     )
 
@@ -446,10 +445,10 @@ def comparison_chart(
             y=flawed_value,
             mode="lines",
             name="Participant",
-            line=dict(
-                color="#fb7185",
-                width=2
-            )
+            line={
+                "color": "#fb7185",
+                "width": 2
+            }
         )
     )
 
@@ -463,29 +462,29 @@ def comparison_chart(
     )
 
     fig.update_layout(
-        title=dict(
-            text=title,
-            font=dict(
-                size=18,
-                color="#e5edf7"
-            )
-        ),
+        title={
+            "text": title,
+            "font": {
+                "size": 18,
+                "color": "#e5edf7"
+            }
+        },
         xaxis_title="Time (seconds)",
         yaxis_title=y_title,
         height=430,
         template="plotly_dark",
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="#091625",
-        margin=dict(
-            l=45,
-            r=20,
-            t=55,
-            b=45
-        ),
-        legend=dict(
-            orientation="h",
-            y=1.08
-        )
+        margin={
+            "l": 45,
+            "r": 20,
+            "t": 55,
+            "b": 45
+        },
+        legend={
+            "orientation": "h",
+            "y": 1.08
+        }
     )
 
     return fig
@@ -1287,7 +1286,7 @@ fig.add_trace(
         y=np.zeros_like(ideal["times"]),
         mode="lines",
         name="Ideal",
-        line=dict(color="#60a5fa", width=2)
+        line={"color": "#60a5fa", "width": 2}
     )
 )
 
@@ -1297,7 +1296,7 @@ fig.add_trace(
         y=np.ones_like(flawed["times"]),
         mode="lines",
         name="Participant",
-        line=dict(color="#fb7185", width=2)
+        line={"color": "#fb7185", "width": 2}
     )
 )
 
@@ -1323,11 +1322,11 @@ if mode == "Evaluation / Ground Truth":
 fig.update_layout(
     title="Where did the system find the problem?",
     xaxis_title="Time (seconds)",
-    yaxis=dict(
-        tickmode="array",
-        tickvals=[0, 1],
-        ticktext=["Ideal", "Participant"]
-    ),
+    yaxis={
+        "tickmode": "array",
+        "tickvals": [0, 1],
+        "ticktext": ["Ideal", "Participant"]
+    },
     height=400,
     template="plotly_dark",
     paper_bgcolor="rgba(0,0,0,0)",
@@ -1500,7 +1499,7 @@ fig.add_trace(
         y=spectrum[mask],
 
         mode="lines",
-        line=dict(color="#a78bfa", width=2),
+        line={"color": "#a78bfa", "width": 2},
         name="FFT"
     )
 )
@@ -1604,8 +1603,8 @@ if mode == "Evaluation / Ground Truth":
         e4.metric("F1 Score", f"{f1 * 100:.2f}%")
 
         st.caption(
-            f"Detected interval: {detected_start:.2f}s – {detected_end:.2f}s. "
-            f"Ground truth: {ground_start:.2f}s – {ground_end:.2f}s. "
+            f"Detected interval: {detected_start:.2f}s - {detected_end:.2f}s. "
+            f"Ground truth: {ground_start:.2f}s - {ground_end:.2f}s. "
             "Results are for this single audio pair; expand the dataset before "
             "reporting them as benchmark performance."
         )

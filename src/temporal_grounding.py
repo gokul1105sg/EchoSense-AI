@@ -1,7 +1,7 @@
 import json
-import whisper
-import numpy as np
 
+import numpy as np
+import whisper
 
 # ==========================================
 # FILE PATHS
@@ -173,7 +173,6 @@ def load_ground_truth():
 
     with open(
         LABEL_FILE,
-        "r",
         encoding="utf-8"
     ) as file:
 

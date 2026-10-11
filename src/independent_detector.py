@@ -1,6 +1,5 @@
-import whisper
 import numpy as np
-
+import whisper
 
 # ==========================================
 # LOAD WHISPER MODEL
@@ -227,17 +226,7 @@ def main():
         )
 
         # Calculate local speech rate
-        if duration > 0:
-
-            rate = (
-                len(region_words)
-                / duration
-                * 60
-            )
-
-        else:
-
-            rate = 0
+        rate = len(region_words) / duration * 60 if duration > 0 else 0
 
         print(f"\nRegion {i}")
         print(f"Time: {start:.2f}s - {end:.2f}s")

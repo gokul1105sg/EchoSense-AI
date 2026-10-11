@@ -1,7 +1,6 @@
-import whisper
 import librosa
 import numpy as np
-
+import whisper
 
 # Load Whisper model once
 MODEL = whisper.load_model("base")

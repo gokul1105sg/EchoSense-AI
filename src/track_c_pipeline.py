@@ -1,8 +1,8 @@
 import json
-import whisper
-import numpy as np
-import librosa
 
+import librosa
+import numpy as np
+import whisper
 
 # ============================================================
 # FILES
@@ -278,15 +278,7 @@ def extract_features(
 
     duration = end - start
 
-    if duration > 0:
-
-        speech_rate = (
-            word_count / duration
-        ) * 60
-
-    else:
-
-        speech_rate = 0
+    speech_rate = word_count / duration * 60 if duration > 0 else 0
 
     # --------------------------------------------------------
     # RMS Energy
@@ -304,7 +296,7 @@ def extract_features(
     # Pitch / F0
     # --------------------------------------------------------
 
-    pitch, voiced_flag, voiced_prob = librosa.pyin(
+    pitch, _voiced_flag, _voiced_prob = librosa.pyin(
         segment,
         fmin=70,
         fmax=400,
@@ -585,7 +577,6 @@ def main():
 
     with open(
         GROUND_TRUTH_FILE,
-        "r",
         encoding="utf-8"
     ) as file:
 
@@ -829,15 +820,7 @@ def main():
 
     union = union_end - union_start
 
-    if union > 0:
-
-        temporal_iou = (
-            intersection / union
-        )
-
-    else:
-
-        temporal_iou = 0
+    temporal_iou = intersection / union if union > 0 else 0
 
 
     # ========================================================

@@ -1,8 +1,8 @@
 import json
-import whisper
+
 import librosa
 import numpy as np
-
+import whisper
 
 # ---------------------------------------
 # WHISPER MODEL
@@ -147,7 +147,6 @@ def analyze():
 
     with open(
         label_file,
-        "r",
         encoding="utf-8"
     ) as f:
 
@@ -360,16 +359,7 @@ def analyze():
     # RATE CHANGE
     # -----------------------------------
 
-    if ideal_rate > 0:
-
-        rate_change = (
-            (flawed_rate - ideal_rate)
-            / ideal_rate
-        ) * 100
-
-    else:
-
-        rate_change = 0
+    rate_change = (flawed_rate - ideal_rate) / ideal_rate * 100 if ideal_rate > 0 else 0
 
 
     # -----------------------------------

@@ -1,6 +1,4 @@
-import numpy as np
 from temporal_analysis import analyze_temporal
-
 
 ideal_file = "dataset/ideal/speech1.wav"
 flawed_file = "dataset/flawed/flawed1.wav"

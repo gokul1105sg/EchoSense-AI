@@ -1,5 +1,6 @@
-import whisper
 from difflib import SequenceMatcher
+
+import whisper
 
 model = whisper.load_model("base")
 
